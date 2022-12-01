@@ -8,8 +8,6 @@ This class has some constraints not fully implemented. Their implementation is l
 
 * Several examples are also provided such as **NQueens**, **TestSorter**, etc.
 
-* Object template **CrowdedChessboard** is to be filled as exercise. We recommend to use **NQueens** as initial inspiration.
-
 In *working* folder the auxiliar files are created such as 
 * cnf input files
 * output files
