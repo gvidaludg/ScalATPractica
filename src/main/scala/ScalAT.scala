@@ -150,11 +150,11 @@ class ScalAT(problemName: String = "", workingpath: String = "working/") {
   def addAMOLog(x: List[Int]): Unit = {
 
     val m = Math.ceil(Math.log(x.length) / Math.log(2)).toInt
-    val y = for (_ <- 0 until m) yield newVar()
+    val y = newVarArray(m)
 
     for ((xval, i) <- x.view.zipWithIndex) {
       for ((yval, j) <- y.view.zipWithIndex) {
-        val pos = (i >> j) & 1 == 1
+        val pos = ((i >> j) & 1) == 1
         preDimacs.write((-xval).toString + " " + (if (pos) { +yval } else { -yval }).toString + " 0\n")
         nclauses += 1
       }
@@ -163,7 +163,7 @@ class ScalAT(problemName: String = "", workingpath: String = "working/") {
     val total = Math.round(Math.pow(2, m)).toInt
     for (i <- x.length until total) {
       for ((yval, j) <- y.view.zipWithIndex) {
-        val pos = (i >> j) & 1 == 1
+        val pos = ((i >> j) & 1) == 1
         preDimacs.write((if (pos) { -yval } else { +yval }).toString + " ") // inverse
       }
       preDimacs.write("0\n")
@@ -270,18 +270,41 @@ class ScalAT(problemName: String = "", workingpath: String = "working/") {
 
   //Adds the encoding of an exactly-K constraint.
   // x can be empty, and K take any value from -infinity to infinity
-  def addEK(x: List[Int], K: Int): Unit = ???
+  def addEK(x: List[Int], K: Int): Unit = {
 
+    val y = newVarArray(x.length)
+    addSorter(x, y.toList)
 
+    preDimacs.write(y(K-1).toString + " 0\n")
+    preDimacs.write((-y(K)).toString + " 0\n")
+    nclauses += 2
+
+  }
 
   //Adds the encoding of an at-least-K constraint.
   // x can be empty, and K take any value from -infinity to infinity
-  def addALK(x: List[Int], K: Int): Unit = ???
+  def addALK(x: List[Int], K: Int): Unit = {
+
+    val y = newVarArray(x.length)
+    addSorter(x, y.toList)
+
+    preDimacs.write(y(K-1).toString + " 0\n")
+    nclauses += 1
+
+  }
+
 
   //Adds the encoding of an at-most-K constraint.
   // x can be empty, and K take any value from -infinity to infinity
-  def addAMK(x: List[Int], K: Int): Unit = ???
+  def addAMK(x: List[Int], K: Int): Unit = {
 
+    val y = newVarArray(x.length)
+    addSorter(x, y.toList)
+
+    preDimacs.write((-y(K)).toString + " 0\n")
+    nclauses += 1
+
+  }
 
   //Adds a PB constraint of the form q[0]x[0] + q[1]x[1] + ... + q[n]x[n] <= K
   //q must be a list of non-negative coefficients, and x a list of literals.
