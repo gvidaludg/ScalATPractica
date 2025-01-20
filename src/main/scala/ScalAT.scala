@@ -147,7 +147,30 @@ class ScalAT(problemName: String = "", workingpath: String = "working/") {
   }
 
   //Adds the logaritic encoding of the at-most-one
-  def addAMOLog(x: List[Int]): Unit = ???
+  def addAMOLog(x: List[Int]): Unit = {
+
+    val m = Math.ceil(Math.log(x.length) / Math.log(2)).toInt
+    val y = for (_ <- 0 until m) yield newVar()
+
+    for ((xval, i) <- x.view.zipWithIndex) {
+      for ((yval, j) <- y.view.zipWithIndex) {
+        val pos = (i >> j) & 1 == 1
+        preDimacs.write((-xval).toString + " " + (if (pos) { +yval } else { -yval }).toString + " 0\n")
+        nclauses += 1
+      }
+    }
+
+    val total = Math.round(Math.pow(2, m)).toInt
+    for (i <- x.length until total) {
+      for ((yval, j) <- y.view.zipWithIndex) {
+        val pos = (i >> j) & 1 == 1
+        preDimacs.write((if (pos) { -yval } else { +yval }).toString + " ") // inverse
+      }
+      preDimacs.write("0\n")
+      nclauses += 1
+    }
+
+  }
 
   //Adds the encoding of the at-least-one.
   def addALO(l: List[Int]): Unit = addClause(l)
